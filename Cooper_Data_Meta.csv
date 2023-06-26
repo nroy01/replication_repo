@@ -1,0 +1,122 @@
+Tumor/ Normal,Tissue,Treatment,Age,Stage,Sample
+Serous_EOC,Serous_EOC,Control,61,4B,SRR10912052
+Serous_EOC,Serous_EOC,Platinum,61,4B,SRR10912053
+Serous_EOC,Serous_EOC,Control,67,4,SRR10912054
+Serous_EOC,Serous_EOC,Platinum,67,4,SRR10912055
+Serous_EOC,Serous_EOC,Control,77,3C,SRR10912056
+Serous_EOC,Serous_EOC,Platinum,77,3C,SRR10912057
+Serous_EOC,Serous_EOC,Control,74,3C,SRR10912058
+Serous_EOC,Serous_EOC,Platinum,74,3C,SRR10912059
+Serous_EOC,Serous_EOC,Control,61,3C,SRR10912060
+Serous_EOC,Serous_EOC,Platinum,61,3C,SRR10912061
+Serous_EOC,Serous_EOC,Control,73,4,SRR10912062
+Serous_EOC,Serous_EOC,Platinum,73,4,SRR10912063
+Serous_EOC,Serous_EOC,Control,65,3C,SRR10912064
+Serous_EOC,Serous_EOC,Platinum,65,3C,SRR10912065
+Serous_EOC,Serous_EOC,Control,66,3C,SRR10912066
+Serous_EOC,Serous_EOC,Platinum,66,3C,SRR10912067
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912068
+Serous_EOC,Serous_EOC,Platinum,67,3C,SRR10912069
+Serous_EOC,Serous_EOC,Control,70,4,SRR10912070
+Serous_EOC,Serous_EOC,Platinum,70,4,SRR10912071
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912072
+Serous_EOC,Serous_EOC,Control,76,3C,SRR10912073
+Serous_EOC,Serous_EOC,Platinum,76,3C,SRR10912074
+Serous_EOC,Serous_EOC,Control,72,3C,SRR10912075
+Serous_EOC,Serous_EOC,Platinum,72,3C,SRR10912076
+Serous_EOC,Serous_EOC,Platinum,67,3C,SRR10912077
+Serous_EOC,Serous_EOC,Control,59,3C,SRR10912078
+Serous_EOC,Serous_EOC,Platinum,59,3C,SRR10912079
+Serous_EOC,Serous_EOC,Control,82,3C,SRR10912080
+Serous_EOC,Serous_EOC,Platinum,82,3C,SRR10912081
+Serous_EOC,Serous_EOC,Control,64,4,SRR10912082
+Serous_EOC,Serous_EOC,Platinum,64,4,SRR10912083
+Serous_EOC,Serous_EOC,Control,68,3C,SRR10912084
+Serous_EOC,Serous_EOC,Platinum,68,3C,SRR10912085
+Serous_EOC,Serous_EOC,Control,53,3C,SRR10912086
+Serous_EOC,Serous_EOC,Platinum,53,3C,SRR10912087
+Serous_EOC,Serous_EOC,Control,54,3C,SRR10912088
+Serous_EOC,Serous_EOC,Control,66,3C,SRR10912089
+Serous_EOC,Serous_EOC,Control,47,3C,SRR10912090
+Serous_EOC,Serous_EOC,Control,62,3C,SRR10912091
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912092
+Serous_EOC,Serous_EOC,Control,66,4,SRR10912093
+Serous_EOC,Serous_EOC,Control,47,3C,SRR10912094
+Serous_EOC,Serous_EOC,Control,73,3C,SRR10912095
+Serous_EOC,Serous_EOC,Control,55,3C,SRR10912096
+Serous_EOC,Serous_EOC,Control,73,3C,SRR10912097
+Serous_EOC,Serous_EOC,Control,47,3C,SRR10912098
+Serous_EOC,Serous_EOC,Control,53,3C,SRR10912099
+Serous_EOC,Serous_EOC,Control,38,3C,SRR10912100
+Serous_EOC,Serous_EOC,Control,48,3C,SRR10912101
+Serous_EOC,Serous_EOC,Control,62,3C,SRR10912102
+Serous_EOC,Serous_EOC,Control,77,2C,SRR10912103
+Serous_EOC,Serous_EOC,Control,63,3C,SRR10912104
+Serous_EOC,Serous_EOC,Control,67,4,SRR10912105
+Serous_EOC,Serous_EOC,Control,58,3C,SRR10912106
+Serous_EOC,Serous_EOC,Control,66,3C,SRR10912107
+Serous_EOC,Serous_EOC,Control,72,3C,SRR10912108
+Serous_EOC,Serous_EOC,Control,67,4,SRR10912109
+Serous_EOC,Serous_EOC,Control,76,3C,SRR10912110
+Serous_EOC,Serous_EOC,Control,76,3C,SRR10912111
+Serous_EOC,Serous_EOC,Control,58,3C,SRR10912112
+Serous_EOC,Serous_EOC,Control,59,3C,SRR10912113
+Serous_EOC,Serous_EOC,Control,50,3C,SRR10912114
+Serous_EOC,Serous_EOC,Control,62,4,SRR10912115
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912116
+Serous_EOC,Serous_EOC,Control,68,3C,SRR10912117
+Serous_EOC,Serous_EOC,Control,63,3C,SRR10912118
+Serous_EOC,Serous_EOC,Control,69,3C,SRR10912119
+Serous_EOC,Serous_EOC,Control,55,4,SRR10912120
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912121
+Serous_EOC,Serous_EOC,Control,76,3C,SRR10912122
+Serous_EOC,Serous_EOC,Control,66,3C,SRR10912123
+Serous_EOC,Serous_EOC,Control,74,4,SRR10912124
+Serous_EOC,Serous_EOC,Control,67,3C,SRR10912125
+Serous_EOC,Serous_EOC,Control,76,4,SRR10912126
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 61,SRR10912127
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 62,SRR10912128
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 63,SRR10912129
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 64,SRR10912130
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 65,SRR10912131
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 66,SRR10912132
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 67,SRR10912133
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 68,SRR10912134
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 69,SRR10912135
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 70,SRR10912136
+Benign_Tissue,Benign_Tissue,Control,NA,patientid: 71,SRR10912137
+Ascites,Ascites,Control,61,4A,SRR10912138
+Ascites,Ascites,Control,73,3C,SRR10912139
+Ascites,Ascites,Control,64,3C,SRR10912140
+Ascites,Ascites,Control,66,3C,SRR10912141
+Serous_EOC,Serous_EOC,Control,61,4A,SRR10912142
+Serous_EOC,Serous_EOC,Control,73,3C,SRR10912143
+Benign_Tissue,Benign_Tissue,Control,43,patientid: 78,SRR10912144
+Serous_EOC,Serous_EOC,Control,64,3C,SRR10912145
+Serous_EOC,Serous_EOC,Control,66,3C,SRR10912146
+Ascites,Ascites,Control,54,3C,SRR10912147
+Ascites,Ascites,Control,66,3C,SRR10912148
+Ascites,Ascites,Control,47,3C,SRR10912149
+Ascites,Ascites,Control,62,3C,SRR10912150
+Ascites,Ascites,Control,67,3C,SRR10912151
+Ascites,Ascites,Control,66,4,SRR10912152
+Ascites,Ascites,Control,47,3C,SRR10912153
+Ascites,Ascites,Control,73,3C,SRR10912154
+Ascites,Ascites,Control,55,3C,SRR10912155
+Ascites,Ascites,Control,47,3C,SRR10912156
+Ascites,Ascites,Control,53,3C,SRR10912157
+Ascites,Ascites,Control,38,3C,SRR10912158
+Ascites,Ascites,Control,48,3C,SRR10912159
+Ascites,Ascites,Control,62,3C,SRR10912160
+Ascites,Ascites,Control,77,2C,SRR10912161
+Ascites,Ascites,Control,63,3C,SRR10912162
+Ascites,Ascites,Control,67,4,SRR10912163
+Ascites,Ascites,Control,66,3C,SRR10912164
+Ascites,Ascites,Control,72,3C,SRR10912165
+Ascites,Ascites,Control,50,3C,SRR10912166
+Ascites,Ascites,Control,63,3C,SRR10912167
+Ascites,Ascites,Control,55,4,SRR10912168
+Ascites,Ascites,Control,67,3C,SRR10912169
+Ascites,Ascites,Control,76,3C,SRR10912170
+Ascites,Ascites,Control,66,3C,SRR10912171
+Ascites,Ascites,Control,74,4,SRR10912172

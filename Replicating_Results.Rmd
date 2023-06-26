@@ -1,0 +1,338 @@
+---
+title: "Results Replication"
+author: "Neel Roy"
+date: "2023-06-22"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Here is my code:**
+
+## Reformatting/Cleaning Up Data
+
+### Raw Counts File
+
+```{r}
+
+cnts <- read.csv('raw_counts_Cooper_data_final.csv')
+
+rownames(cnts) <- cnts$X
+
+cnts$X <- NULL
+
+cnts <- as.matrix(cnts)
+```
+
+This takes raw_counts file and corrects the columns and index of the dataframe, then converts the file from a data frame to a matrix.
+
+### Meta Data
+
+```{r}
+
+column_data <- read.csv('Cooper_Data_Meta.csv')
+
+rownames(column_data) <- column_data$Sample
+
+column_data <- column_data[,c("Tissue","Treatment","Stage")]
+
+
+#column_data$Tissue <- factor(column_data$Tissue)
+#column_data$Treatment <- factor(column_data$Treatment)
+#column_data$Stage <- factor(column_data$Stage)
+
+#column_data$Treatment <- NULL
+#column_data$Stage <- NULL
+#column_data$Sample <- NULL
+
+column_data
+```
+
+This takes the metadata, or column data, file and corrects the columns and index of the dataframe, then converts the file from a data frame to a matrix.
+
+### Check if rownames and columnnames Match
+
+```{r}
+
+all(rownames(column_data) %in% colnames(cnts))
+
+all(rownames(column_data) == colnames(cnts))
+```
+
+This checks if the rownames and column names match.
+
+### DeSeq2
+
+```{r}
+
+library("DESeq2")
+dds <- DESeqDataSetFromMatrix(countData = cnts,
+                              colData = column_data,
+                              design = ~ Tissue)
+dds
+```
+
+### **Pre-filtering**
+
+```{r}
+
+keep <- rowSums(counts(dds)) >= 10
+dds <- dds[keep,]
+```
+
+Prefiltering can improve visualization as features with no information are not plotted.
+
+### Factor Levels
+
+```{r}
+
+dds$Tissue <- relevel(dds$Tissue, ref = "Benign_Tissue")
+```
+
+"By default, R will choose a *reference level* for factors based on alphabetical order. Then, if you never tell the DESeq2 functions which level you want to compare against (e.g. which level represents the control group), the comparisons will be based on the alphabetical order of the levels. There are two solutions: you can either explicitly tell *results* which comparison to make using the `contrast` argument (this will be shown later), or you can explicitly set the factors levels. In order to see the change of reference levels reflected in the results names, you need to either run `DESeq` or `nbinomWaldTest`/`nbinomLRT` after the re-leveling operation."
+
+Setting Benign Tissue as the reference level.
+
+## **Differential expression analysis**
+
+```{r}
+
+dds <- DESeq(dds)
+resultsNames(dds)
+
+#summary(res)
+```
+
+```{r}
+
+res_Serous_EOC <- results(dds, name="Tissue_Serous_EOC_vs_Benign_Tissue")
+
+res_Serous_EOC
+
+resLFC_Serous_EOC <- lfcShrink(dds, coef="Tissue_Serous_EOC_vs_Benign_Tissue", type="apeglm")
+
+resLFC_Serous_EOC
+```
+
+```{r}
+
+res_Ascites <- results(dds, name="Tissue_Ascites_vs_Benign_Tissue")
+
+res_Ascites
+
+resLFC_Ascites <- lfcShrink(dds, coef="Tissue_Ascites_vs_Benign_Tissue", type="apeglm")
+
+resLFC_Ascites
+```
+
+```{r}
+
+resLFCOrdered_Serous_EOC <- resLFC_Serous_EOC[order(resLFC_Serous_EOC$pvalue),]
+
+resLFCOrdered_Serous_EOC
+
+resLFCOrdered_Ascites <- resLFC_Ascites[order(resLFC_Ascites$pvalue),]
+
+resLFCOrdered_Ascites
+```
+
+```{r}
+
+summary(resLFCOrdered_Serous_EOC)
+
+summary(resLFCOrdered_Ascites)
+```
+
+```{r}
+
+plotMA(resLFCOrdered_Serous_EOC, ylim=c(-2,2))
+
+idx_LFCOrdered_Serous_EOC <- identify(resLFCOrdered_Serous_EOC$baseMean, resLFCOrdered_Serous_EOC$log2FoldChange)
+rownames(resLFCOrdered_Serous_EOC)[idx_LFCOrdered_Serous_EOC]
+
+plotMA(resLFCOrdered_Ascites, ylim=c(-2,2))
+```
+
+```{r}
+
+plotMA(resLFCOrdered_Serous_EOC, ylim=c(-2,2))
+
+idx_LFCOrdered_Serous_EOC <- identify(resLFCOrdered_Serous_EOC$baseMean, resLFCOrdered_Serous_EOC$log2FoldChange)
+rownames(resLFCOrdered_Serous_EOC)[idx_LFCOrdered_Serous_EOC]
+```
+
+```{r}
+
+resNorm <- lfcShrink(dds, coef=3, type="normal")
+resAsh <- lfcShrink(dds, coef=3, type="ashr")
+resLFC <- lfcShrink(dds, coef=3, type="apeglm")
+
+par(mfrow=c(1,3), mar=c(4,4,2,1))
+xlim <- c(1,1e5); ylim <- c(-3,3)
+plotMA(resLFC, xlim=xlim, ylim=ylim, main="apeglm")
+plotMA(resNorm, xlim=xlim, ylim=ylim, main="normal")
+plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
+```
+
+```{r}
+
+plotCounts(dds, gene=which.min(resLFC_Serous_EOC$padj), intgroup="Tissue")
+
+plotCounts(dds, gene=which.min(resLFC_Ascites$padj), intgroup="Tissue")
+```
+
+```{r}
+
+vsd <- vst(dds, blind=FALSE)
+#rld <- rlog(dds, blind=FALSE)
+ntd <- normTransform(dds)
+library("vsn")
+meanSdPlot(assay(ntd))
+meanSdPlot(assay(vsd))
+#meanSdPlot(assay(rld))
+```
+
+```{r}
+
+library("pheatmap")
+select <- order(rowMeans(counts(dds,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(dds)[,c("Tissue","Treatment")])
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+#pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+#         cluster_cols=FALSE, annotation_col=df)
+```
+
+```{r}
+
+sampleDists <- dist(t(assay(vsd)))
+
+library("RColorBrewer")
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd$condition, vsd$type, sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+```{r}
+
+plotPCA(vsd, intgroup=c("Tissue"))
+```
+
+```{r}
+
+results(dds, contrast=c("Tissue","Serous_EOC","Benign_Tissue"))
+
+```
+
+```{r}
+
+resApeT <- lfcShrink(dds, coef=2, type="apeglm", lfcThreshold=1)
+plotMA(resApeT, ylim=c(-3,3), cex=.8)
+abline(h=c(-1,1), col="dodgerblue", lwd=2)
+```
+
+```{r}
+
+resAshT <- lfcShrink(dds, coef=2, type="ashr", lfcThreshold=1)
+plotMA(resAshT, ylim=c(-3,3), cex=.8)
+abline(h=c(-1,1), col="dodgerblue", lwd=2)
+```
+
+```{r}
+
+par(mar=c(8,5,2,2))
+boxplot(log10(assays(dds)[["cooks"]]), range=0, las=2)
+```
+
+```{r}
+
+plotDispEsts(dds)
+```
+
+```{r}
+
+metadata(resLFC_Serous_EOC)$alpha
+
+metadata(resLFC_Serous_EOC)$filterThreshold
+
+plot(metadata(resLFC_Serous_EOC)$filterNumRej, 
+     type="b", ylab="number of rejections",
+     xlab="quantiles of filter")
+lines(metadata(resLFC_Serous_EOC)$lo.fit, col="red")
+abline(v=metadata(resLFC_Serous_EOC)$filterTheta)
+
+resNoFilt <- results(dds, independentFiltering=FALSE)
+addmargins(table(filtering=(resLFC_Serous_EOC$padj < .1),
+                 noFiltering=(resNoFilt$padj < .1)))
+
+```
+
+```{r}
+
+metadata(resLFC_Ascites)$alpha
+
+metadata(resLFC_Ascites)$filterThreshold
+
+plot(metadata(resLFC_Ascites)$filterNumRej, 
+     type="b", ylab="number of rejections",
+     xlab="quantiles of filter")
+lines(metadata(resLFC_Ascites)$lo.fit, col="red")
+abline(v=metadata(resLFC_Ascites)$filterTheta)
+
+resNoFilt <- results(dds, independentFiltering=FALSE)
+addmargins(table(filtering=(resLFC_Ascites$padj < .1),
+                 noFiltering=(resNoFilt$padj < .1)))
+```
+
+```{r}
+
+par(mfrow=c(2,2),mar=c(2,2,1,1))
+ylim <- c(-2.5,2.5)
+resGA <- results(dds, lfcThreshold=.5, altHypothesis="greaterAbs")
+resLA <- results(dds, lfcThreshold=.5, altHypothesis="lessAbs")
+resG <- results(dds, lfcThreshold=.5, altHypothesis="greater")
+resL <- results(dds, lfcThreshold=.5, altHypothesis="less")
+drawLines <- function() abline(h=c(-.5,.5),col="dodgerblue",lwd=2)
+plotMA(resGA, ylim=ylim); drawLines()
+plotMA(resLA, ylim=ylim); drawLines()
+plotMA(resG, ylim=ylim); drawLines()
+plotMA(resL, ylim=ylim); drawLines()
+```
+
+```{r}
+
+#mcols(dds,use.names=TRUE)[1:4,1:4]
+
+#substr(names(mcols(dds)),1,10) 
+
+#mcols(mcols(dds), use.names=TRUE)[1:4,]
+
+#head(assays(dds)[["mu"]])
+
+#head(assays(dds)[["cooks"]])
+
+#head(dispersions(dds))
+
+#head(mcols(dds)$dispersion)
+
+#sizeFactors(dds)
+
+#head(coef(dds))
+
+#attr(dds, "betaPriorVar")
+
+#priorInfo(resLFC)
+```
