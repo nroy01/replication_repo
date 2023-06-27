@@ -130,6 +130,8 @@ resLFC_Ascites <- lfcShrink(dds, coef="Tissue_Ascites_vs_Benign_Tissue", type="a
 resLFC_Ascites
 ```
 
+Using lfcShrik to make vizualization and ranking of genes better.
+
 ```{r}
 
 resLFCOrdered_Serous_EOC <- resLFC_Serous_EOC[order(resLFC_Serous_EOC$pvalue),]
@@ -141,12 +143,16 @@ resLFCOrdered_Ascites <- resLFC_Ascites[order(resLFC_Ascites$pvalue),]
 resLFCOrdered_Ascites
 ```
 
+Ordered by p-value.
+
 ```{r}
 
 summary(resLFCOrdered_Serous_EOC)
 
 summary(resLFCOrdered_Ascites)
 ```
+
+### MA Plots
 
 ```{r}
 
@@ -179,12 +185,20 @@ plotMA(resNorm, xlim=xlim, ylim=ylim, main="normal")
 plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
 ```
 
+### **Plot Counts**
+
 ```{r}
 
 plotCounts(dds, gene=which.min(resLFC_Serous_EOC$padj), intgroup="Tissue")
 
 plotCounts(dds, gene=which.min(resLFC_Ascites$padj), intgroup="Tissue")
+
+plotCounts(dds, gene=which.max(resLFC_Serous_EOC$padj), intgroup="Tissue")
+
+plotCounts(dds, gene=which.max(resLFC_Ascites$padj), intgroup="Tissue")
 ```
+
+### Data Transformations + Variance
 
 ```{r}
 
@@ -192,10 +206,13 @@ vsd <- vst(dds, blind=FALSE)
 #rld <- rlog(dds, blind=FALSE)
 ntd <- normTransform(dds)
 library("vsn")
+head(assay(vsd), 10)
 meanSdPlot(assay(ntd))
 meanSdPlot(assay(vsd))
 #meanSdPlot(assay(rld))
 ```
+
+### Heatmaps
 
 ```{r}
 
@@ -226,16 +243,22 @@ pheatmap(sampleDistMatrix,
          col=colors)
 ```
 
+### PCA
+
 ```{r}
 
 plotPCA(vsd, intgroup=c("Tissue"))
 ```
+
+### Random
 
 ```{r}
 
 results(dds, contrast=c("Tissue","Serous_EOC","Benign_Tissue"))
 
 ```
+
+#### More LFC Shrinkage
 
 ```{r}
 
@@ -251,16 +274,22 @@ plotMA(resAshT, ylim=c(-3,3), cex=.8)
 abline(h=c(-1,1), col="dodgerblue", lwd=2)
 ```
 
+#### Boxplot
+
 ```{r}
 
 par(mar=c(8,5,2,2))
 boxplot(log10(assays(dds)[["cooks"]]), range=0, las=2)
 ```
 
+#### Dispersion Plot
+
 ```{r}
 
 plotDispEsts(dds)
 ```
+
+#### Other
 
 ```{r}
 
@@ -335,4 +364,30 @@ plotMA(resL, ylim=ylim); drawLines()
 #attr(dds, "betaPriorVar")
 
 #priorInfo(resLFC)
+```
+
+```{r}
+
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+final_data_Serous <- read.csv('Final_Data_LFC_Serous_EOC.csv')
+
+final_data_Serous$symbol <- mapIds(org.Hs.eg.db, keys = final_data_Serous$X, column = 'SYMBOL', keytype = 'ENSEMBL')
+
+final_data_Serous <- final_data_Serous[order(final_data_Serous$pvalue),]
+
+head(final_data_Serous, 50)
+
+
+
+
+final_data_Ascites <- read.csv('Final_Data_LFC_Ascites.csv')
+
+final_data_Ascites$symbol <- mapIds(org.Hs.eg.db, keys = final_data_Ascites$X, column = 'SYMBOL', keytype = 'ENSEMBL')
+
+final_data_Ascites <- final_data_Ascites[order(final_data_Ascites$pvalue),]
+
+head(final_data_Ascites, 50)
+
 ```
