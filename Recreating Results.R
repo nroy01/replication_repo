@@ -23,6 +23,7 @@ column_data$Stage <- factor(column_data$Stage)
 
 head(cnts,3)
 
+
 column_data
 
 all(rownames(column_data) %in% colnames(cnts))
