@@ -277,10 +277,16 @@ library("pheatmap")
 select <- order(rowMeans(counts(dds_Tissue,normalized=TRUE)),
                 decreasing=TRUE)[1:20]
 df <- as.data.frame(colData(dds_Tissue)[,c("Tissue","Treatment")])
-pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
-pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
+pheatmap(assay(ntd)[select,], cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=TRUE, annotation_col=df)
+
+```
+
+```{r}
+
+
+pheatmap(assay(vsd)[select,], cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=TRUE, annotation_col=df)
 #pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE,
 #         cluster_cols=FALSE, annotation_col=df)
 ```
@@ -305,6 +311,11 @@ pheatmap(sampleDistMatrix,
 ```{r}
 
 plotPCA(vsd, intgroup=c("Tissue"))
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("clusterProfiler")
 ```
 
 ### Random
