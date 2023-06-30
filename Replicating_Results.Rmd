@@ -43,7 +43,7 @@ column_data <- column_data[,c("Tissue","Treatment","Stage")]
 
 
 #column_data$Tissue <- factor(column_data$Tissue)
-#column_data$Treatment <- factor(column_data$Treatment)
+column_data$Treatment <- factor(column_data$Treatment)
 #column_data$Stage <- factor(column_data$Stage)
 
 #column_data$Treatment <- NULL
@@ -71,18 +71,26 @@ This checks if the rownames and column names match.
 ```{r}
 
 library("DESeq2")
-dds <- DESeqDataSetFromMatrix(countData = cnts,
+dds_Tissue <- DESeqDataSetFromMatrix(countData = cnts,
                               colData = column_data,
                               design = ~ Tissue)
-dds
+dds_Tissue
+
+dds_Treatment <- DESeqDataSetFromMatrix(countData = cnts,
+                              colData = column_data,
+                              design = ~ Treatment)
+dds_Treatment
 ```
 
 ### **Pre-filtering**
 
 ```{r}
 
-keep <- rowSums(counts(dds)) >= 10
-dds <- dds[keep,]
+keep <- rowSums(counts(dds_Tissue)) >= 10
+dds_Tissue <- dds_Tissue[keep,]
+
+keep <- rowSums(counts(dds_Treatment)) >= 10
+dds_Treatment <- dds_Treatment[keep,]
 ```
 
 Prefiltering can improve visualization as features with no information are not plotted.
@@ -91,7 +99,9 @@ Prefiltering can improve visualization as features with no information are not p
 
 ```{r}
 
-dds$Tissue <- relevel(dds$Tissue, ref = "Benign_Tissue")
+dds_Tissue$Tissue <- relevel(dds_Tissue$Tissue, ref = "Benign_Tissue")
+
+dds_Treatment$Treatment <- factor(dds_Treatment$Treatment, levels = c("Control","Platinum"))
 ```
 
 "By default, R will choose a *reference level* for factors based on alphabetical order. Then, if you never tell the DESeq2 functions which level you want to compare against (e.g. which level represents the control group), the comparisons will be based on the alphabetical order of the levels. There are two solutions: you can either explicitly tell *results* which comparison to make using the `contrast` argument (this will be shown later), or you can explicitly set the factors levels. In order to see the change of reference levels reflected in the results names, you need to either run `DESeq` or `nbinomWaldTest`/`nbinomLRT` after the re-leveling operation."
@@ -102,32 +112,46 @@ Setting Benign Tissue as the reference level.
 
 ```{r}
 
-dds <- DESeq(dds)
-resultsNames(dds)
+dds_Tissue <- DESeq(dds_Tissue)
+resultsNames(dds_Tissue)
+
+dds_Treatment <- DESeq(dds_Treatment)
+resultsNames(dds_Treatment)
 
 #summary(res)
 ```
 
 ```{r}
 
-res_Serous_EOC <- results(dds, name="Tissue_Serous_EOC_vs_Benign_Tissue")
+res_Serous_EOC <- results(dds_Tissue, name="Tissue_Serous_EOC_vs_Benign_Tissue")
 
 res_Serous_EOC
 
-resLFC_Serous_EOC <- lfcShrink(dds, coef="Tissue_Serous_EOC_vs_Benign_Tissue", type="apeglm")
+resLFC_Serous_EOC <- lfcShrink(dds_Tissue, coef="Tissue_Serous_EOC_vs_Benign_Tissue", type="apeglm")
 
 resLFC_Serous_EOC
 ```
 
 ```{r}
 
-res_Ascites <- results(dds, name="Tissue_Ascites_vs_Benign_Tissue")
+res_Ascites <- results(dds_Tissue, name="Tissue_Ascites_vs_Benign_Tissue")
 
 res_Ascites
 
-resLFC_Ascites <- lfcShrink(dds, coef="Tissue_Ascites_vs_Benign_Tissue", type="apeglm")
+resLFC_Ascites <- lfcShrink(dds_Tissue, coef="Tissue_Ascites_vs_Benign_Tissue", type="apeglm")
 
 resLFC_Ascites
+```
+
+```{r}
+
+res_Treatment <- results(dds_Treatment, name="Treatment_Platinum_vs_Control")
+
+res_Treatment
+
+resLFC_Treatment <- lfcShrink(dds_Treatment, coef="Treatment_Platinum_vs_Control", type="apeglm")
+
+resLFC_Treatment
 ```
 
 Using lfcShrik to make vizualization and ranking of genes better.
@@ -141,6 +165,10 @@ resLFCOrdered_Serous_EOC
 resLFCOrdered_Ascites <- resLFC_Ascites[order(resLFC_Ascites$pvalue),]
 
 resLFCOrdered_Ascites
+
+resLFC_Treatment <- resLFC_Treatment[order(resLFC_Treatment$pvalue),]
+
+resLFC_Treatment
 ```
 
 Ordered by p-value.
@@ -150,6 +178,8 @@ Ordered by p-value.
 summary(resLFCOrdered_Serous_EOC)
 
 summary(resLFCOrdered_Ascites)
+
+summary(resLFC_Treatment)
 ```
 
 ### MA Plots
@@ -162,6 +192,8 @@ idx_LFCOrdered_Serous_EOC <- identify(resLFCOrdered_Serous_EOC$baseMean, resLFCO
 rownames(resLFCOrdered_Serous_EOC)[idx_LFCOrdered_Serous_EOC]
 
 plotMA(resLFCOrdered_Ascites, ylim=c(-2,2))
+
+plotMA(resLFC_Treatment, ylim=c(-2,2))
 ```
 
 ```{r}
@@ -174,9 +206,20 @@ rownames(resLFCOrdered_Serous_EOC)[idx_LFCOrdered_Serous_EOC]
 
 ```{r}
 
-resNorm <- lfcShrink(dds, coef=3, type="normal")
-resAsh <- lfcShrink(dds, coef=3, type="ashr")
-resLFC <- lfcShrink(dds, coef=3, type="apeglm")
+resNorm <- lfcShrink(dds_Tissue, coef=3, type="normal")
+resAsh <- lfcShrink(dds_Tissue, coef=3, type="ashr")
+resLFC <- lfcShrink(dds_Tissue, coef=3, type="apeglm")
+
+par(mfrow=c(1,3), mar=c(4,4,2,1))
+xlim <- c(1,1e5); ylim <- c(-3,3)
+plotMA(resLFC, xlim=xlim, ylim=ylim, main="apeglm")
+plotMA(resNorm, xlim=xlim, ylim=ylim, main="normal")
+plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
+
+
+resNorm <- lfcShrink(dds_Treatment, coef=2, type="normal")
+resAsh <- lfcShrink(dds_Treatment, coef=2, type="ashr")
+resLFC <- lfcShrink(dds_Treatment, coef=2, type="apeglm")
 
 par(mfrow=c(1,3), mar=c(4,4,2,1))
 xlim <- c(1,1e5); ylim <- c(-3,3)
@@ -189,22 +232,36 @@ plotMA(resAsh, xlim=xlim, ylim=ylim, main="ashr")
 
 ```{r}
 
-plotCounts(dds, gene=which.min(resLFC_Serous_EOC$padj), intgroup="Tissue")
+plotCounts(dds_Tissue, gene=which.min(resLFC_Serous_EOC$padj), intgroup="Tissue")
 
-plotCounts(dds, gene=which.min(resLFC_Ascites$padj), intgroup="Tissue")
+plotCounts(dds_Tissue, gene=which.min(resLFC_Ascites$padj), intgroup="Tissue")
 
-plotCounts(dds, gene=which.max(resLFC_Serous_EOC$padj), intgroup="Tissue")
+plotCounts(dds_Treatment, gene=which.min(resLFC_Treatment$padj), intgroup="Treatment")
 
-plotCounts(dds, gene=which.max(resLFC_Ascites$padj), intgroup="Tissue")
+plotCounts(dds_Tissue, gene=which.max(resLFC_Serous_EOC$padj), intgroup="Tissue")
+
+plotCounts(dds_Tissue, gene=which.max(resLFC_Ascites$padj), intgroup="Tissue")
+
+plotCounts(dds_Treatment, gene=which.max(resLFC_Treatment$padj), intgroup="Treatment")
 ```
 
 ### Data Transformations + Variance
 
 ```{r}
 
-vsd <- vst(dds, blind=FALSE)
-#rld <- rlog(dds, blind=FALSE)
-ntd <- normTransform(dds)
+vsd <- vst(dds_Tissue, blind=FALSE)
+#rld <- rlog(dds_Tissue, blind=FALSE)
+ntd <- normTransform(dds_Tissue)
+library("vsn")
+head(assay(vsd), 10)
+meanSdPlot(assay(ntd))
+meanSdPlot(assay(vsd))
+#meanSdPlot(assay(rld))
+
+
+vsd <- vst(dds_Treatment, blind=FALSE)
+#rld <- rlog(dds_Tissue, blind=FALSE)
+ntd <- normTransform(dds_Treatment)
 library("vsn")
 head(assay(vsd), 10)
 meanSdPlot(assay(ntd))
@@ -217,9 +274,9 @@ meanSdPlot(assay(vsd))
 ```{r}
 
 library("pheatmap")
-select <- order(rowMeans(counts(dds,normalized=TRUE)),
+select <- order(rowMeans(counts(dds_Tissue,normalized=TRUE)),
                 decreasing=TRUE)[1:20]
-df <- as.data.frame(colData(dds)[,c("Tissue","Treatment")])
+df <- as.data.frame(colData(dds_Tissue)[,c("Tissue","Treatment")])
 pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
@@ -254,7 +311,7 @@ plotPCA(vsd, intgroup=c("Tissue"))
 
 ```{r}
 
-results(dds, contrast=c("Tissue","Serous_EOC","Benign_Tissue"))
+results(dds_Tissue, contrast=c("Tissue","Serous_EOC","Benign_Tissue"))
 
 ```
 
@@ -262,14 +319,14 @@ results(dds, contrast=c("Tissue","Serous_EOC","Benign_Tissue"))
 
 ```{r}
 
-resApeT <- lfcShrink(dds, coef=2, type="apeglm", lfcThreshold=1)
+resApeT <- lfcShrink(dds_Tissue, coef=2, type="apeglm", lfcThreshold=1)
 plotMA(resApeT, ylim=c(-3,3), cex=.8)
 abline(h=c(-1,1), col="dodgerblue", lwd=2)
 ```
 
 ```{r}
 
-resAshT <- lfcShrink(dds, coef=2, type="ashr", lfcThreshold=1)
+resAshT <- lfcShrink(dds_Tissue, coef=2, type="ashr", lfcThreshold=1)
 plotMA(resAshT, ylim=c(-3,3), cex=.8)
 abline(h=c(-1,1), col="dodgerblue", lwd=2)
 ```
@@ -279,14 +336,14 @@ abline(h=c(-1,1), col="dodgerblue", lwd=2)
 ```{r}
 
 par(mar=c(8,5,2,2))
-boxplot(log10(assays(dds)[["cooks"]]), range=0, las=2)
+boxplot(log10(assays(dds_Tissue)[["cooks"]]), range=0, las=2)
 ```
 
 #### Dispersion Plot
 
 ```{r}
 
-plotDispEsts(dds)
+plotDispEsts(dds_Tissue)
 ```
 
 #### Other
@@ -303,7 +360,7 @@ plot(metadata(resLFC_Serous_EOC)$filterNumRej,
 lines(metadata(resLFC_Serous_EOC)$lo.fit, col="red")
 abline(v=metadata(resLFC_Serous_EOC)$filterTheta)
 
-resNoFilt <- results(dds, independentFiltering=FALSE)
+resNoFilt <- results(dds_Tissue, independentFiltering=FALSE)
 addmargins(table(filtering=(resLFC_Serous_EOC$padj < .1),
                  noFiltering=(resNoFilt$padj < .1)))
 
@@ -321,7 +378,7 @@ plot(metadata(resLFC_Ascites)$filterNumRej,
 lines(metadata(resLFC_Ascites)$lo.fit, col="red")
 abline(v=metadata(resLFC_Ascites)$filterTheta)
 
-resNoFilt <- results(dds, independentFiltering=FALSE)
+resNoFilt <- results(dds_Tissue, independentFiltering=FALSE)
 addmargins(table(filtering=(resLFC_Ascites$padj < .1),
                  noFiltering=(resNoFilt$padj < .1)))
 ```
@@ -330,10 +387,10 @@ addmargins(table(filtering=(resLFC_Ascites$padj < .1),
 
 par(mfrow=c(2,2),mar=c(2,2,1,1))
 ylim <- c(-2.5,2.5)
-resGA <- results(dds, lfcThreshold=.5, altHypothesis="greaterAbs")
-resLA <- results(dds, lfcThreshold=.5, altHypothesis="lessAbs")
-resG <- results(dds, lfcThreshold=.5, altHypothesis="greater")
-resL <- results(dds, lfcThreshold=.5, altHypothesis="less")
+resGA <- results(dds_Tissue, lfcThreshold=.5, altHypothesis="greaterAbs")
+resLA <- results(dds_Tissue, lfcThreshold=.5, altHypothesis="lessAbs")
+resG <- results(dds_Tissue, lfcThreshold=.5, altHypothesis="greater")
+resL <- results(dds_Tissue, lfcThreshold=.5, altHypothesis="less")
 drawLines <- function() abline(h=c(-.5,.5),col="dodgerblue",lwd=2)
 plotMA(resGA, ylim=ylim); drawLines()
 plotMA(resLA, ylim=ylim); drawLines()
@@ -343,25 +400,25 @@ plotMA(resL, ylim=ylim); drawLines()
 
 ```{r}
 
-#mcols(dds,use.names=TRUE)[1:4,1:4]
+#mcols(dds_Tissue,use.names=TRUE)[1:4,1:4]
 
-#substr(names(mcols(dds)),1,10) 
+#substr(names(mcols(dds_Tissue)),1,10) 
 
-#mcols(mcols(dds), use.names=TRUE)[1:4,]
+#mcols(mcols(dds_Tissue), use.names=TRUE)[1:4,]
 
-#head(assays(dds)[["mu"]])
+#head(assays(dds_Tissue)[["mu"]])
 
-#head(assays(dds)[["cooks"]])
+#head(assays(dds_Tissue)[["cooks"]])
 
-#head(dispersions(dds))
+#head(dispersions(dds_Tissue))
 
-#head(mcols(dds)$dispersion)
+#head(mcols(dds_Tissue)$dispersion)
 
-#sizeFactors(dds)
+#sizeFactors(dds_Tissue)
 
-#head(coef(dds))
+#head(coef(dds_Tissue))
 
-#attr(dds, "betaPriorVar")
+#attr(dds_Tissue, "betaPriorVar")
 
 #priorInfo(resLFC)
 ```
@@ -390,4 +447,14 @@ final_data_Ascites <- final_data_Ascites[order(final_data_Ascites$pvalue),]
 
 head(final_data_Ascites, 50)
 
+
+
+
+final_data_Treatment <- read.csv('Final_Data_Treatment.csv')
+
+final_data_Treatment$symbol <- mapIds(org.Hs.eg.db, keys = final_data_Ascites$X, column = 'SYMBOL', keytype = 'ENSEMBL')
+
+final_data_Treatment <- final_data_Treatment[order(final_data_Treatment$pvalue),]
+
+head(final_data_Treatment, 50)
 ```
